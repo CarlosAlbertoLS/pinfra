@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">SICE_Pinfra</string>
+
+    <string name="textInitializing">Inicializando...</string>
+    <string name="textPago">Pago</string>
+    <string name="textSuccess">aceptado</string>
+    <string name="textError">rechazado</string>
+    <string name="textCancelled">cancelado</string>
+    <string name="textProcessing">Procesando...</string>
+    <string name="text_remove_card_title">Retire su</string>
+    <string name="text_remove_card_subtitle">tarjeta</string>
+    <!--  Home  -->
+    <string name="txt_title_home">Bienvenido</string>
+    <string name="txt_subtitle_home">Paga sin contacto aquí</string>
+
+    <!--  Settings  -->
+    <string name="textPassword">Contraseña</string>
+    <string name="title_activity_settings">Configuración</string>
+    <string name="attachment_title">Mostrar botones</string>
+    <string name="settings_text_reference_bank">Referencia bancario</string>\
+    <string name="settings_text_tmout"> Timeout (segundos) </string>
+    <string name="Amex">Activar Amex</string>
+    <string name="WorkLevel">Activar WorkLevel</string>
+    <string name="Sonidos">Activar sonidos</string>
+
+    <string name="error_connection_tvm_title">Pago bancario no disponible</string>
+    <string name="error_connection_tvm_description">Lamentamos los inconvenientes</string>
+</resources>

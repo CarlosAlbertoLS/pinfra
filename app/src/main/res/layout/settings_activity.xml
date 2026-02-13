@@ -1,0 +1,160 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayout6"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!--
+    android:textColor="#00020202"
+-->
+
+    <Switch
+        android:id="@+id/butttons"
+        android:layout_width="357dp"
+        android:layout_height="76dp"
+        android:text="@string/attachment_title"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar2"
+        app:layout_constraintVertical_bias="0.045" />
+
+    <Button
+        android:id="@+id/back"
+        android:layout_width="38dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="4dp"
+        android:background="#00020202"
+        android:textColor="#D3DFDF"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="0dp" />
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar2"
+        android:layout_width="412dp"
+        android:layout_height="58dp"
+        android:background="@color/WhiteSmoke"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageView7"
+        android:layout_width="20dp"
+        android:layout_height="29dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/arrow" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/title_activity_settings"
+        android:textAllCaps="true"
+        android:textColor="@color/Gray"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/toolbar2"
+        app:layout_constraintEnd_toEndOf="@+id/toolbar2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/toolbar2" />
+
+    <LinearLayout
+        android:id="@+id/linearLayoutReference"
+        android:layout_width="385dp"
+        android:layout_height="104dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/butttons">
+
+        <TextView
+            android:id="@+id/txt_referenceBank"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_text_reference_bank"
+            android:textSize="16dp" />
+
+        <EditText
+            android:id="@+id/editText_referenceBank"
+            android:layout_width="383dp"
+            android:layout_height="62dp"
+            android:ems="12"
+            android:inputType="text"
+            android:maxLength="12"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.421"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+            app:layout_constraintVertical_bias="0.0" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayoutTmout"
+        android:layout_width="388dp"
+        android:layout_height="305dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayoutReference">
+
+        <TextView
+            android:id="@+id/txt_Tmout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_text_tmout"
+            android:textSize="16dp" />
+
+        <EditText
+            android:id="@+id/editText_Tmout"
+            android:layout_width="383dp"
+            android:layout_height="62dp"
+            android:ems="10"
+            android:inputType="number"
+            android:maxLength="2"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.421"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <Switch
+            android:id="@+id/butttons4"
+            android:layout_width="match_parent"
+            android:layout_height="71dp"
+            android:text="@string/WorkLevel"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@+id/butttons3"
+            tools:layout_editor_absoluteX="16dp" />
+
+        <Switch
+            android:id="@+id/butttons3"
+            android:layout_width="match_parent"
+            android:layout_height="71dp"
+            android:text="@string/Amex"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayoutTmout"
+            tools:layout_editor_absoluteX="27dp" />
+
+        <Switch
+            android:id="@+id/butttons5"
+            android:layout_width="match_parent"
+            android:layout_height="71dp"
+            android:text="@string/Sonidos"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayoutTmout"
+            tools:layout_editor_absoluteX="27dp" />
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/dialog_rounded_white">
+
+    <ImageView
+        android:id="@+id/imageView5"
+        android:layout_width="342dp"
+        android:layout_height="83dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/space"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.492"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textView7"
+        android:layout_width="362dp"
+        android:layout_height="93dp"
+        android:layout_marginTop="8dp"
+        android:text=""
+        android:textAlignment="center"
+        android:textColor="#787878"
+        android:textSize="38sp"
+        android:textStyle="bold"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.489"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/space2" />
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/animationView"
+        android:layout_width="323dp"
+        android:layout_height="96dp"
+        app:layout_constraintBottom_toTopOf="@+id/txt_loading_removecard"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView7"
+        app:lottie_autoPlay="true"
+        app:lottie_enableMergePathsForKitKatAndAbove="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/load" />
+
+    <Space
+        android:id="@+id/space2"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="84dp" />
+
+    <Space
+        android:id="@+id/space"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        tools:layout_editor_absoluteX="183dp"
+        tools:layout_editor_absoluteY="598dp" />
+
+    <TextView
+        android:id="@+id/txt_loading_removecard"
+        android:layout_width="346dp"
+        android:layout_height="83dp"
+        android:layout_marginBottom="36dp"
+        android:gravity="bottom|center_horizontal"
+        android:text="@string/textInitializing"
+        android:textAlignment="center"
+        android:textSize="38sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/space"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/imageView8"
+        android:layout_width="216dp"
+        android:layout_height="148dp"
+        android:layout_marginTop="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/connection_text_title"
+        app:srcCompat="@drawable/logo" />
+
+    <TextView
+        android:id="@+id/connection_text_title"
+        android:layout_width="274dp"
+        android:layout_height="119dp"
+        android:layout_marginTop="20dp"
+        android:text="@string/error_connection_tvm_title"
+        android:textAlignment="center"
+        android:textColor="#787878"
+        android:textSize="38sp"
+        android:textStyle="bold"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/space2" />
+
+    <TextView
+        android:id="@+id/connection_text_subtitle"
+        android:layout_width="344dp"
+        android:layout_height="96dp"
+        android:layout_marginTop="40dp"
+        android:text="@string/error_connection_tvm_description"
+        android:textAlignment="center"
+        android:textColor="#787878"
+        android:textSize="38sp"
+        android:textStyle="bold"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/space"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView8"
+        app:layout_constraintVertical_bias="0.206" />
+
+    <Space
+        android:id="@+id/space2"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="84dp" />
+
+    <Space
+        android:id="@+id/space"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        tools:layout_editor_absoluteX="183dp"
+        tools:layout_editor_absoluteY="598dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
