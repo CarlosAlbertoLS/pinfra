@@ -757,7 +757,7 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
 
     override fun onInitTerminalSuccess() {
         Log.e("[onInitTerminalSuccess]", "")
-        deviceMIT.hideButtons(true)
+        deviceMIT.hideButtons(false)
         closeInitializingDialog("loadingDialog")
     }
 
