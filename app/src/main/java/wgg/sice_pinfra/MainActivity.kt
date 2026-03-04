@@ -18,9 +18,15 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
 import com.example.firebasedatamodule.AppConfigurator
 import com.google.gson.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import mx.com.mit.mobile.mitmobilelibrary.model.*
 import wgg.sice_pinfra.InitApplication.Companion.prefs
 import wgg.sice_pinfra.mit.ReadingMIT
@@ -38,6 +44,9 @@ import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.coroutines.resume
 
 private const val locationAndPhonePermissions = 200
 
@@ -70,6 +79,8 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
     private val mainHandler = Handler(Looper.getMainLooper())
     private val pendingRunnables = mutableListOf<Runnable>()
 
+    private var paymentJob: Job? = null
+    private var responseContinuation: Continuation<Unit>? = null
     private fun postDelayed(delayMs: Long, action: () -> Unit) {
         val runnable = object : Runnable {
             override fun run() {
@@ -312,28 +323,42 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
         }
     }
 
-    private fun paymentProcess(msg: JsonObject) {
-        communicationAttempts = 0
-        val isConnected = CheckNetworkTask(this).execute()
-        if (isConnected) {
-            message = ""
-            networkAttempts = 0
-            amount = msg.get("Monto").asString
-            refInt = msg.get("RefInt").asString
-            reference = "${prefs.getReference()}-$refInt"
-            Log.e("doRetail", "1. doRetail")
-            isProccess = true
-            readingMIT.doRetail(amount, reference)
-        } else {
-            networkAttempts++
-            postDelayed(1500) {
-                writeSerial(JSON_NACK)
+    private suspend fun paymentProcess(msg: JsonObject) {
+        return suspendCancellableCoroutine { continuation ->
+
+            responseContinuation = continuation
+
+            continuation.invokeOnCancellation {
+                responseContinuation = null
+                Log.d("APPLOG", "paymentProcess cancelado")
             }
-            if (networkAttempts >= MAX_NETWORK_ATTEMPTS) {
-                closeDialogErrorConnection()
-                openDialogErrorConnection(MSG_PAYMENT_UNAVAILABLE, MSG_SORRY_INCONVENIENCE)
+
+            communicationAttempts = 0
+            val isConnected = CheckNetworkTask(this).execute()
+            if (isConnected) {
+
+                message = ""
+                networkAttempts = 0
+                amount = msg.get("Monto").asString
+                refInt = msg.get("RefInt").asString
+                reference = "${prefs.getReference()}-$refInt"
+                Log.e("doRetail", "1. doRetail")
+                //isProccess = true
+                readingMIT.doRetail(amount, reference)
             } else {
-                openDialogErrorConnection("Conectando", "Esperando comunicación")
+
+                networkAttempts++
+                postDelayed(1500) {
+                    writeSerial(JSON_NACK)
+                }
+                responseContinuation = null
+                if (networkAttempts >= MAX_NETWORK_ATTEMPTS) {
+                    closeDialogErrorConnection()
+                    openDialogErrorConnection(MSG_PAYMENT_UNAVAILABLE, MSG_SORRY_INCONVENIENCE)
+                } else {
+                    openDialogErrorConnection("Conectando", "Esperando comunicación")
+
+                }
             }
         }
     }
@@ -344,11 +369,15 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
         writeSerial(buildAckResponse(isConnected))
     }
 
-    private fun handlePaymentRequest(jsonObject: JsonObject) {
+    private suspend fun handlePaymentRequest(jsonObject: JsonObject) {
+
         val isConnected = CheckNetworkTask(this).execute()
         writeSerial(buildAckResponse(isConnected))
         if (isConnected) {
+            isProccess = true
             paymentProcess(jsonObject)
+        }else{
+
         }
     }
 
@@ -368,8 +397,13 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
     }
 
     private fun handleCancelRequest() {
-        readingMIT.cancelReadingCard()
-        communicationAttempts = 0
+        if(isProccess){
+            readingMIT.cancelReadingCard()
+            communicationAttempts = 0
+
+        }else{
+
+        }
     }
 
     private fun writeSerial(message: String) {
@@ -407,6 +441,8 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
         writeSerial(message)
         waitingAckFromPayment = true
         ackRetryCount = 0
+
+        isProccess = false
     }
 
     override fun cancelReadingCard() {
@@ -418,6 +454,8 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
         writeSerial(message)
         waitingAckFromPayment = true
         ackRetryCount = 0
+        isProccess = false
+        paymentJob?.cancel()
         showErrorCustomDialog(MSG_TRANSACTION_CANCELLED)
     }
 
@@ -494,8 +532,14 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
             waitingAckFromPayment = true
             ackRetryCount = 0
             if (isSuccess) {
+                responseContinuation?.resume(Unit)
+                responseContinuation = null
+                isProccess = false
                 successDialog(transaction.auth ?: "")
             } else {
+                responseContinuation?.resume(Unit)
+                responseContinuation = null
+                isProccess = false
                 showErrorCustomDialog(transaction.errorDescription ?: MSG_UNKNOWN_ERROR)
             }
         } catch (e: Exception) {
@@ -556,6 +600,8 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
         } catch (e: Exception) {
             Log.e("showErrorCustomDialog", "Error mostrando el dialogo personalizado", e)
         }
+
+        isProccess = false
     }
 
     private fun successDialog(autorizationMessage: String) {
@@ -672,8 +718,20 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
                     try {
                         val jsonObject = JsonParser.parseString(jsonString).asJsonObject
                         if (jsonObject.has("Msg") && jsonObject.get("Msg").asString == "cancel") {
+
                             Log.e("SICE[CANCEL]", "Mensaje de cancelación recibido durante proceso de cobro")
+                            Log.d("APPLOG", "Recibí un cancel")
+
+                            val cancelMessage = buildJsonObject {
+                                put("Respuesta", "ACK")
+                                put("descripcionError", "Cancel Received")
+
+                            }.toString()
+                            writeSerial(cancelMessage)
+
+                            paymentJob?.cancel()
                             handleCancelRequest()
+
                         } else {
                             Log.e("SICE[IGNORADO]", "Mensaje ignorado, proceso de cobro en curso")
                         }
@@ -701,8 +759,46 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
                         jsonObject.has("Msg") -> {
                             when (jsonObject.get("Msg").asString) {
                                 "status" -> handleControl()
-                                "payment" -> handlePaymentRequest(jsonObject)
-                                "cancel" -> handleCancelRequest()
+                                "payment" -> {
+                                    paymentJob?.cancel()
+
+                                    paymentJob = lifecycleScope.launch {
+                                        try {
+                                            Log.d("APPLOG", "Iniciando Pago...")
+
+                                            handlePaymentRequest(jsonObject)
+
+                                            Log.d("APPLOG", "Pago finalizado con éxito")
+                                        } catch (e: CancellationException) {
+
+                                            Log.e("APPLOG", "El proceso de pago fue abortado externamente")
+                                        }
+                                    }
+
+                                }
+                                "cancel" -> {
+                                    Log.d("APPLOG", "Recibí un cancel")
+
+                                    val calendar = Calendar.getInstance().time
+                                    val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                                    val fechaFormateada = formatter.format(calendar)
+
+                                    val cancelMessage = buildTransactionResultJson(
+                                        msg = "-1",
+                                        descripcionError = "Cancel Received",
+                                        numTarjeta = "",
+                                        nombre = "",
+                                        fechaAuth = fechaFormateada,
+                                        numOper = "",
+                                        numAuth = "",
+                                        ref = reference
+                                    )
+                                    writeSerial(cancelMessage)
+
+                                    paymentJob?.cancel()
+                                    handleCancelRequest()
+
+                                }
                                 else -> handleUnknownMessage()
                             }
                         }

@@ -88,13 +88,13 @@ dependencies {
 
     /* QA */
     implementation (files("libs/QA/sdkVierge_DEV_01.15.20-release.aar"))
-    implementation (files("libs/QA/MITMobileLibrary-2.7.0-release.aar"))
-    implementation (files("libs/QA/MITReaderLibrary-2.7.0-release.aar"))
+    implementation (files("libs/QA/MITMobileLibrary-2.7.3-DEV-QA-release.aar"))
+    implementation (files("libs/QA/MITReaderLibrary-2.7.3-DEV-QA-release.aar"))
 
     /* PROD */
-//    implementation (files("libs/PROD/sdkVierge_PROD_01.15.20-release.aar"))
-//    implementation (files("libs/PROD/MITMobileLibrary-2.7.0-release.aar"))
-//    implementation (files("libs/PROD/MITReaderLibrary-2.7.0-release.aar"))
+    /*implementation (files("libs/PROD/sdkVierge_PROD_01.15.20-release.aar"))
+    implementation (files("libs/PROD/MITMobileLibrary-2.7.3-release.aar"))
+    implementation (files("libs/PROD/MITReaderLibrary-2.7.3-release.aar"))*/
 
     /* CONF */
     implementation (files("libs/CONF/firebasedatamodule-release.aar"))
