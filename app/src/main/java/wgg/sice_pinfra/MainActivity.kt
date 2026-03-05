@@ -9,6 +9,7 @@ import android.graphics.drawable.ColorDrawable
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -28,6 +29,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import mx.com.mit.mobile.mitmobilelibrary.model.*
+import org.checkerframework.checker.units.qual.s
 import wgg.sice_pinfra.InitApplication.Companion.prefs
 import wgg.sice_pinfra.mit.ReadingMIT
 import wgg.sice_pinfra.databinding.ActivityMainBinding
@@ -55,6 +57,8 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
     private val deviceMIT: DeviceMIT by lazy { DeviceMIT(this, this) }
     private val readingMIT: ReadingMIT by lazy { ReadingMIT(this, this) }
     private val comManager: ComMIT by lazy { ComMIT(this, this) }
+    private var dialogConnectionError   : Dialog? = null
+    private var timer: CountDownTimer? = null
 
     private lateinit var binding        : ActivityMainBinding
     private lateinit var appConfigurator: AppConfigurator
@@ -364,9 +368,14 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
     }
 
     private fun handleControl() {
+
+        dialogConnectionError?.dismiss()
+
         val isConnected = CheckNetworkTask(this).execute()
         communicationAttempts = 0
+
         writeSerial(buildAckResponse(isConnected))
+
     }
 
     private suspend fun handlePaymentRequest(jsonObject: JsonObject) {
@@ -377,7 +386,7 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
             isProccess = true
             paymentProcess(jsonObject)
         }else{
-
+            showConnectionErrorAlert()
         }
     }
 
@@ -758,7 +767,9 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
                     when {
                         jsonObject.has("Msg") -> {
                             when (jsonObject.get("Msg").asString) {
-                                "status" -> handleControl()
+                                "status" -> {
+                                    handleControl()
+                                }
                                 "payment" -> {
                                     paymentJob?.cancel()
 
@@ -829,6 +840,41 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
         }
     }
 
+    fun showConnectionErrorAlert() {
+
+        timer?.cancel()
+
+        if (dialogConnectionError == null) {
+
+            dialogConnectionError = Dialog(this).apply {
+                requestWindowFeature(Window.FEATURE_NO_TITLE)
+                setCancelable(false)
+                window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                setContentView(R.layout.dialog_connection_error)
+            }
+        }
+
+        val countDownText = dialogConnectionError?.findViewById<TextView>(R.id.registered_ticket_conter)
+
+        timer = object : CountDownTimer(5000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                countDownText?.text = (millisUntilFinished / 1000).toString()
+            }
+
+            override fun onFinish() {
+                if (dialogConnectionError?.isShowing == true) {
+                    dialogConnectionError?.dismiss()
+                }
+            }
+        }
+
+        if (dialogConnectionError?.isShowing == false) {
+            dialogConnectionError?.show()
+        }
+
+        timer?.start()
+    }
+
     override fun deviceResult(result: String) {
         Log.e("[deviceResult]", result)
     }
@@ -844,6 +890,9 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
         Log.e("[onInitTerminalError]", result)
         if (result.contains("EC_0002")) {
             Log.e("[onInitTerminalError]", "Se detectó error de conexión, reintentando login...")
+
+            closeInitializingDialog("loadingDialog")
+            showConnectionErrorAlert()
 
             Handler(Looper.getMainLooper()).postDelayed({
                 loginMIT.setCredentials()

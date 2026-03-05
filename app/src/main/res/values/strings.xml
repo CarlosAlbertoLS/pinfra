@@ -25,4 +25,6 @@
 
     <string name="error_connection_tvm_title">Pago bancario no disponible</string>
     <string name="error_connection_tvm_description">Lamentamos los inconvenientes</string>
+    <string name="info_connection_error_title">Pago bancario no disponible</string>
+    <string name="info_connection_error_description">Lamentamos los inconvenientes\n</string>
 </resources>
