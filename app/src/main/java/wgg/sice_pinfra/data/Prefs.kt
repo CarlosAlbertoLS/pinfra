@@ -26,7 +26,7 @@ class Prefs(val context: Context) {
         return storage.getString(REFERENCE, "")
     }
     fun getTmout(): Int {
-        return storage.getInt(TMOUT, 30)
+        return storage.getInt(TMOUT, 60)
     }
     fun getParking():Int? {
         return storage.getInt(PARKING, 100)

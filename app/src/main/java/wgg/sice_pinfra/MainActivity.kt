@@ -36,6 +36,7 @@ import wgg.sice_pinfra.databinding.ActivityMainBinding
 import wgg.sice_pinfra.mit.ComMIT
 import wgg.sice_pinfra.mit.DeviceMIT
 import wgg.sice_pinfra.mit.LoginMIT
+import wgg.sice_pinfra.mit.TransactionMIT
 import wgg.sice_pinfra.screens.ErrorCustomDialogFragment
 import wgg.sice_pinfra.screens.InitializingFragment
 import wgg.sice_pinfra.screens.LoadingFragment
@@ -52,11 +53,13 @@ import kotlin.coroutines.resume
 
 private const val locationAndPhonePermissions = 200
 
-open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT.DeviceListener, ReadingMIT.ReadingListener, ComMIT.ComListener {
+open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT.DeviceListener, ReadingMIT.ReadingListener, ComMIT.ComListener, TransactionMIT.TransactionListener {
     private val loginMIT: LoginMIT by lazy { LoginMIT(this, this) }
     private val deviceMIT: DeviceMIT by lazy { DeviceMIT(this, this) }
     private val readingMIT: ReadingMIT by lazy { ReadingMIT(this, this) }
     private val comManager: ComMIT by lazy { ComMIT(this, this) }
+
+    private val transactionManager: TransactionMIT by lazy { TransactionMIT(this, this) }
     private var dialogConnectionError   : Dialog? = null
     private var timer: CountDownTimer? = null
 
@@ -79,6 +82,8 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
     private var waitingAckFromPayment = false
     private var ackRetryCount = 0
     private var outOfService = false
+
+    private var cachedReferenceMIT = ""
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private val pendingRunnables = mutableListOf<Runnable>()
@@ -383,8 +388,12 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
         val isConnected = CheckNetworkTask(this).execute()
         writeSerial(buildAckResponse(isConnected))
         if (isConnected) {
-            isProccess = true
-            paymentProcess(jsonObject)
+            if (!isProccess){
+                isProccess = true
+                paymentProcess(jsonObject)
+            }else{
+                Log.d("APPLOG", "Ignorando")
+            }
         }else{
             showConnectionErrorAlert()
         }
@@ -411,7 +420,7 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
             communicationAttempts = 0
 
         }else{
-
+            readingMIT.cancelReadingCard()
         }
     }
 
@@ -428,6 +437,15 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
     override fun onConnectionResponse(reader: MITReader?, error: MITError?) {
         Log.e("Elementos", "3.")
     }
+
+    override fun onReturnTransactions(found: Boolean) {
+        if (found) {
+            Log.e("onReturnTransactions", "Se encontraron transacciones")
+        } else {
+            Log.e("onReturnTransactions", "No se encontraron transacciones")
+        }
+    }
+
 
     /**************************************************** [ M I T ] - ReadingMIT **/
     override fun readingResult(result: String) {
@@ -446,12 +464,11 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
         )
         postDelayed(2000) {
             showErrorCustomDialog(errorMessage)
+            Log.d("APPLOG", "El error: $result")
         }
         writeSerial(message)
         waitingAckFromPayment = true
         ackRetryCount = 0
-
-        isProccess = false
     }
 
     override fun cancelReadingCard() {
@@ -512,6 +529,10 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
             val fechaAuth = "${transaction.date ?: ""} ${transaction.time ?: ""}".trim()
 
             message = if (isSuccess) {
+
+                cachedReferenceMIT = transaction.reference ?: ""
+                Log.d("APPLOG", "El valor de cached reference en confirmTransaction: $cachedReferenceMIT")
+
                 val tipoTarjeta = transaction.ccType?.substringBeforeLast("/") ?: ""
                 val marcaTarjeta = transaction.ccType?.substringAfterLast("/") ?: ""
                 buildTransactionResultJson(
@@ -540,6 +561,7 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
             writeSerial(message)
             waitingAckFromPayment = true
             ackRetryCount = 0
+
             if (isSuccess) {
                 responseContinuation?.resume(Unit)
                 responseContinuation = null
@@ -781,13 +803,15 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
 
                                             Log.d("APPLOG", "Pago finalizado con éxito")
                                         } catch (e: CancellationException) {
-
+                                            paymentJob?.cancel()
                                             Log.e("APPLOG", "El proceso de pago fue abortado externamente")
                                         }
                                     }
 
                                 }
                                 "cancel" -> {
+
+                                    paymentJob?.cancel()
                                     Log.d("APPLOG", "Recibí un cancel")
 
                                     val calendar = Calendar.getInstance().time
@@ -805,8 +829,6 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
                                         ref = reference
                                     )
                                     writeSerial(cancelMessage)
-
-                                    paymentJob?.cancel()
                                     handleCancelRequest()
 
                                 }
