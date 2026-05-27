@@ -29,7 +29,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import mx.com.mit.mobile.mitmobilelibrary.model.*
-import org.checkerframework.checker.units.qual.s
 import wgg.sice_pinfra.InitApplication.Companion.prefs
 import wgg.sice_pinfra.mit.ReadingMIT
 import wgg.sice_pinfra.databinding.ActivityMainBinding
@@ -83,7 +82,8 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
     private var ackRetryCount = 0
     private var outOfService = false
 
-    private var cachedReferenceMIT = ""
+    private var cachedReference = ""
+    private var referenceCounter = 0
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private val pendingRunnables = mutableListOf<Runnable>()
@@ -351,6 +351,19 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
                 amount = msg.get("Monto").asString
                 refInt = msg.get("RefInt").asString
                 reference = "${prefs.getReference()}-$refInt"
+
+                Log.d("APPLOG", "El valor de la referencia: $refInt")
+                Log.d("APPLOG", "Comparando cached y reference: $cachedReference, $reference")
+
+                if (cachedReference != reference){
+
+                    cachedReference = reference
+                    referenceCounter = 0
+                }else{
+                    referenceCounter++
+                    reference = "$cachedReference-$referenceCounter"
+                }
+                Log.d("APPLOG", "Reference en el doRetail: $reference")
                 Log.e("doRetail", "1. doRetail")
                 //isProccess = true
                 readingMIT.doRetail(amount, reference)
@@ -438,12 +451,35 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
         Log.e("Elementos", "3.")
     }
 
-    override fun onReturnTransactions(found: Boolean) {
-        if (found) {
-            Log.e("onReturnTransactions", "Se encontraron transacciones")
+    override fun onReturnTransactions(report: MITReport?, error: MITError?) {
+
+        if (error != null) {
+            val descripcion = error.description ?: "Error desconocido sin descripción"
+            Log.e("APPLOG", "Error al buscar la transacción: $descripcion, $error")
+            readingResult(descripcion)
         } else {
-            Log.e("onReturnTransactions", "No se encontraron transacciones")
+            if (report?.transactions.isNullOrEmpty()){
+
+            }
+            Log.e("APPLOG", "No hay error")
+            val lastApprovedTransaction = report?.transactions?.findLast { it.approved == true }?.approved ?: false
+            //val isApproved = report?.transactions?.find { it.approved == true }?.approved ?: false
+
+            Log.d("APPLOG", "El valor: $lastApprovedTransaction")
+            Log.d("ReportBro", "El reporte: ${report.toString()}")
+
+            if (lastApprovedTransaction){
+                Log.d("APPLOG", "Encontré un reporte aprobado")
+                displayTransactionResult(report?.transactions?.get(0)!!)
+            }else{
+                Log.e("confirmTransaction", "Success")
+                Log.e("APPLOG", "Estoy en el confirmTransaction y no es aprobado, ejecutando nuevamente el cobro")
+                readingMIT.submitPayment( "C")
+                showLoadingDialog(typeReading)
+            }
+
         }
+
     }
 
 
@@ -514,10 +550,18 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
 
     override fun confirmTransaction(bankCard: MITCard) {
         Log.e("confirmTransaction", "4. confirmTransaction")
-        typeReading = bankCard.reading.toString()
-        Log.e("confirmTransaction", "Success")
-        readingMIT.submitPayment( "C")
-        showLoadingDialog(typeReading)
+
+        if (referenceCounter > 0){
+            Log.d("APPLOG", "Buscando la transaccion con la referencia: $cachedReference")
+            transactionManager.getTransactionByReference(cachedReference)
+        }else{
+            Log.d("APPLOG", "Haciendo un pago nuevo")
+            typeReading = bankCard.reading.toString()
+            Log.e("confirmTransaction", "Success")
+            readingMIT.submitPayment( "C")
+            showLoadingDialog(typeReading)
+        }
+
     }
 
     override fun displayTransactionResult(transaction: MITTransaction) {
@@ -529,12 +573,11 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
             val fechaAuth = "${transaction.date ?: ""} ${transaction.time ?: ""}".trim()
 
             message = if (isSuccess) {
-
-                cachedReferenceMIT = transaction.reference ?: ""
-                Log.d("APPLOG", "El valor de cached reference en confirmTransaction: $cachedReferenceMIT")
-
                 val tipoTarjeta = transaction.ccType?.substringBeforeLast("/") ?: ""
                 val marcaTarjeta = transaction.ccType?.substringAfterLast("/") ?: ""
+                Log.d("APPLOG", "Los valores almacenados: cached = $cachedReference, reference = $reference, contador = $referenceCounter")
+                Log.d("APPLOG", "Reference en el displayTransaction: $reference")
+
                 buildTransactionResultJson(
                     msg = "0",
                     numTarjeta = transaction.ccNumber ?: "",
@@ -542,7 +585,7 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
                     fechaAuth = fechaAuth,
                     numOper = transaction.folio ?: "",
                     numAuth = transaction.auth ?: "",
-                    ref = reference,
+                    ref = if (referenceCounter > 0) cachedReference else reference,
                     tipoTarjeta = tipoTarjeta,
                     marcaTarjeta = marcaTarjeta
                 )
@@ -558,6 +601,9 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
                     ref = reference
                 )
             }
+
+            Log.d("APPLOg", "El valor de la referencia al finalizar el pago: $cachedReference")
+
             writeSerial(message)
             waitingAckFromPayment = true
             ackRetryCount = 0

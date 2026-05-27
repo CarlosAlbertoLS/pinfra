@@ -1,6 +1,7 @@
 package wgg.sice_pinfra.mit
 
 import android.content.Context
+import android.util.Log
 import mx.com.mit.mobile.mitmobilelibrary.manager.functions.MITTransactionCallback
 import mx.com.mit.mobile.mitmobilelibrary.manager.functions.MITTransactionManager
 import mx.com.mit.mobile.mitmobilelibrary.manager.transaction.reading.MITReadingCallback
@@ -28,15 +29,9 @@ class TransactionMIT(
     ) {
     }
 
-    override fun onReturnTransactions(
-        report: MITReport?,
-        error: MITError?
-    ) {
-        return if (report != null && error == null) {
-            transactionListener.onReturnTransactions(false)
-        } else {
-            transactionListener.onReturnTransactions(true)
-        }
+    override fun onReturnTransactions(report: MITReport?, error: MITError?) {
+        Log.d("APPLOG", "Lo recibido desde mit: $report")
+        transactionListener.onReturnTransactions(report, error)
     }
 
     override fun onSaveSignatureResponse(error: MITError?) {
@@ -55,7 +50,7 @@ class TransactionMIT(
     }
 
     interface TransactionListener {
-        fun onReturnTransactions(found: Boolean)
+        fun onReturnTransactions(report: MITReport?, error: MITError?)
     }
 
 }
