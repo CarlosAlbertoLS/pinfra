@@ -458,9 +458,6 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
             Log.e("APPLOG", "Error al buscar la transacción: $descripcion, $error")
             readingResult(descripcion)
         } else {
-            if (report?.transactions.isNullOrEmpty()){
-
-            }
             Log.e("APPLOG", "No hay error")
             val lastApprovedTransaction = report?.transactions?.findLast { it.approved == true }?.approved ?: false
             //val isApproved = report?.transactions?.find { it.approved == true }?.approved ?: false
@@ -552,8 +549,14 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
         Log.e("confirmTransaction", "4. confirmTransaction")
 
         if (referenceCounter > 0){
-            Log.d("APPLOG", "Buscando la transaccion con la referencia: $cachedReference")
-            transactionManager.getTransactionByReference(cachedReference)
+            if (referenceCounter == 1){
+                Log.d("APPLOG", "Buscando la transaccion con la referencia: $cachedReference")
+                transactionManager.getTransactionByReference(cachedReference)
+            }else{
+                Log.d("APPLOG", "Buscando la transaccion con la referencia: $cachedReference-${referenceCounter-1}")
+                transactionManager.getTransactionByReference("$cachedReference-${referenceCounter-1}")
+            }
+
         }else{
             Log.d("APPLOG", "Haciendo un pago nuevo")
             typeReading = bankCard.reading.toString()

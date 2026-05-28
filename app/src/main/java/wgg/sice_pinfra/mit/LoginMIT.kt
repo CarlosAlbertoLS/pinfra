@@ -21,7 +21,7 @@ class LoginMIT(
 //        } else {
 //            MITLoginManager(context, this, MITEnvironment.PROD)
 //        }
-        MITLoginManager(context, this, MITEnvironment.QA, MITReader.Model.IM30)
+        MITLoginManager(context, this, MITEnvironment.PROD, MITReader.Model.IM30)
     }
 
     private lateinit var secureDataManager: SecureDataManager

@@ -14,7 +14,7 @@ class DeviceMIT(
     private val listener: DeviceListener
 ) : MITDeviceCallback {
     private val deviceManager: MITDeviceManager by lazy {
-        MITDeviceManager(context, MITReader.Model.IM30, this, MITEnvironment.QA)
+        MITDeviceManager(context, MITReader.Model.IM30, this, MITEnvironment.PROD)
     }
 
     fun connectDevice() {
