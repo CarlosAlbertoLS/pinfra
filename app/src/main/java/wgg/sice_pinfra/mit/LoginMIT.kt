@@ -16,12 +16,7 @@ class LoginMIT(
     private val listener: LoginListener
 ): MITLoginCallback {
     private val loginManager: MITLoginManager by lazy {
-//        if (prefs.getParking() == 99) {
-//            MITLoginManager(context, this, MITEnvironment.QA)
-//        } else {
-//            MITLoginManager(context, this, MITEnvironment.PROD)
-//        }
-        MITLoginManager(context, this, MITEnvironment.PROD, MITReader.Model.IM30)
+        MITLoginManager(context, this, MITEnvironment.QA, MITReader.Model.IM30)
     }
 
     private lateinit var secureDataManager: SecureDataManager

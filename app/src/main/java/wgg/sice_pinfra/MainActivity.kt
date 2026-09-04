@@ -84,6 +84,7 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
 
     private var cachedReference = ""
     private var referenceCounter = 0
+    private var successMessage: String? = null
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private val pendingRunnables = mutableListOf<Runnable>()
@@ -356,17 +357,16 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
                 Log.d("APPLOG", "Comparando cached y reference: $cachedReference, $reference")
 
                 if (cachedReference != reference){
-
                     cachedReference = reference
                     referenceCounter = 0
                 }else{
                     referenceCounter++
                     reference = "$cachedReference-$referenceCounter"
                 }
-                Log.d("APPLOG", "Reference en el doRetail: $reference")
-                Log.e("doRetail", "1. doRetail")
+
+                lookForTransaction(reference)
                 //isProccess = true
-                readingMIT.doRetail(amount, reference)
+                //readingMIT.doRetail(amount, reference)
             } else {
 
                 networkAttempts++
@@ -451,7 +451,9 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
         Log.e("Elementos", "3.")
     }
 
-    override fun onReturnTransactions(report: MITReport?, error: MITError?) {
+    override fun  onReturnTransactions(report: MITReport?, error: MITError?) {
+
+        closeLoadingDialog()
 
         if (error != null) {
             val descripcion = error.description ?: "Error desconocido sin descripción"
@@ -467,12 +469,12 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
 
             if (lastApprovedTransaction){
                 Log.d("APPLOG", "Encontré un reporte aprobado")
+                successMessage = getString(R.string.textAlreadyApproved)
                 displayTransactionResult(report?.transactions?.get(0)!!)
             }else{
-                Log.e("confirmTransaction", "Success")
                 Log.e("APPLOG", "Estoy en el confirmTransaction y no es aprobado, ejecutando nuevamente el cobro")
-                readingMIT.submitPayment( "C")
-                showLoadingDialog(typeReading)
+                readingMIT.doRetail(amount, reference)
+
             }
 
         }
@@ -546,9 +548,18 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
     }
 
     override fun confirmTransaction(bankCard: MITCard) {
-        Log.e("confirmTransaction", "4. confirmTransaction")
 
+        typeReading = bankCard.reading.toString()
+        Log.e("confirmTransaction", "Success")
+        readingMIT.submitPayment( "C")
+        showLoadingDialog(typeReading)
+
+    }
+
+    fun lookForTransaction(reference: String) {
         if (referenceCounter > 0){
+            showLoadingDialog("")
+
             if (referenceCounter == 1){
                 Log.d("APPLOG", "Buscando la transaccion con la referencia: $cachedReference")
                 transactionManager.getTransactionByReference(cachedReference)
@@ -559,10 +570,8 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
 
         }else{
             Log.d("APPLOG", "Haciendo un pago nuevo")
-            typeReading = bankCard.reading.toString()
-            Log.e("confirmTransaction", "Success")
-            readingMIT.submitPayment( "C")
-            showLoadingDialog(typeReading)
+            readingMIT.doRetail(amount, reference)
+
         }
 
     }
@@ -615,7 +624,8 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
                 responseContinuation?.resume(Unit)
                 responseContinuation = null
                 isProccess = false
-                successDialog(transaction.auth ?: "")
+                successDialog(transaction.auth ?: "", successMessage)
+                
             } else {
                 responseContinuation?.resume(Unit)
                 responseContinuation = null
@@ -684,15 +694,16 @@ open class MainActivity : AppCompatActivity(), LoginMIT.LoginListener, DeviceMIT
         isProccess = false
     }
 
-    private fun successDialog(autorizationMessage: String) {
+    private fun successDialog(autorizationMessage: String, customTitle: String?) {
         closeLoadingDialog()
         playSound(R.raw.approved_sound_v1)
-        val successDialogFragment = SuccessDialogFragment.newInstance(autorizationMessage)
+        val successDialogFragment = SuccessDialogFragment.newInstance(autorizationMessage, customTitle)
         supportFragmentManager.beginTransaction()
             .add(successDialogFragment, "successDialog")
             .commitAllowingStateLoss()
         Handler(Looper.getMainLooper()).postDelayed({
             closeSuccessDialog()
+            successMessage = null
         }, 3000)
     }
 

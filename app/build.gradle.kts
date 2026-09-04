@@ -15,8 +15,8 @@ android {
         applicationId = "wgg.sice_pinfra"
         minSdk = 24
         targetSdk = 35
-        versionCode = 3
-        versionName = "3.0"
+        versionCode = 4
+        versionName = "4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
@@ -87,46 +87,46 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     /* QA */
-    /*implementation (files("libs/QA/sdkVierge_DEV_01.15.20-release.aar"))
-    implementation (files("libs/QA/MITMobileLibrary-2.7.3-DEV-QA-release.aar"))
-    implementation (files("libs/QA/MITReaderLibrary-2.7.3-DEV-QA-release.aar"))*/
+/*implementation(files("libs/DEV-QA/sdkVierge_DEV_01.15.20-release.aar"))
+implementation(files("libs/DEV-QA/MITMobileLibrary-2.7.5-DEV-QA-release.aar"))
+implementation(files("libs/DEV-QA/MITReaderLibrary-2.7.5-DEV-QA-release.aar"))*/
 
     /* PROD */
     implementation (files("libs/PROD/sdkVierge_PROD_01.15.20-release.aar"))
-    implementation (files("libs/PROD/MITMobileLibrary-2.7.3-release.aar"))
-    implementation (files("libs/PROD/MITReaderLibrary-2.7.3-release.aar"))
+    implementation (files("libs/PROD/MITMobileLibrary-2.7.5-release.aar"))
+    implementation (files("libs/PROD/MITReaderLibrary-2.7.5-release.aar"))
 
     /* CONF */
-    implementation (files("libs/CONF/firebasedatamodule-release.aar"))
+    implementation(files("libs/CONF/firebasedatamodule-release.aar"))
 
 
-    implementation ("androidx.room:room-runtime:2.5.2")
+    implementation("androidx.room:room-runtime:2.5.2")
 
-    implementation ("com.starmicronics:stario10:1.8.0")
+    implementation("com.starmicronics:stario10:1.8.0")
 
-    implementation ("androidx.core:core-ktx:1.9.0")
-    implementation ("com.google.code.gson:gson:2.9.1")
-    implementation ("io.reactivex.rxjava2:rxjava:2.2.21")
-    implementation ("io.reactivex.rxjava2:rxandroid:2.1.1")
+    implementation("androidx.core:core-ktx:1.9.0")
+    implementation("com.google.code.gson:gson:2.9.1")
+    implementation("io.reactivex.rxjava2:rxjava:2.2.21")
+    implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
 
-    implementation ("androidx.appcompat:appcompat:1.6.1")
-    implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation ("androidx.navigation:navigation-fragment-ktx:2.5.3")
-    implementation ("androidx.navigation:navigation-ui-ktx:2.5.3")
-    implementation ("androidx.preference:preference-ktx:1.2.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.5.3")
+    implementation("androidx.navigation:navigation-ui-ktx:2.5.3")
+    implementation("androidx.preference:preference-ktx:1.2.0")
 
-    testImplementation ("junit:junit:4.13.2")
-    androidTestImplementation ("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation ("androidx.test.espresso:espresso-core:3.5.1")
-    implementation ("com.google.guava:guava:31.1-jre")
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-    implementation ("com.airbnb.android:lottie:5.2.0")
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    implementation("com.google.guava:guava:31.1-jre")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+    implementation("com.airbnb.android:lottie:5.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
     implementation("io.github.binaryfoo:emv-bertlv:0.1.7")
 
-    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation ("com.jaredrummler:colorpicker:1.1.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.jaredrummler:colorpicker:1.1.0")
     implementation("com.google.guava:guava:31.1-jre")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation("com.airbnb.android:lottie:5.2.0")
